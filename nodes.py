@@ -70,7 +70,7 @@ ANY = AnyType("*")
 SCHEDULERS_COMFY = comfy.samplers.KSampler.SCHEDULERS
 SCHEDULERS_EFFICIENT = comfy.samplers.KSampler.SCHEDULERS + ['AYS SD1', 'AYS SDXL', 'AYS SVD']
 SCHEDULERS_IMPACT = comfy.samplers.KSampler.SCHEDULERS + ['AYS SDXL', 'AYS SD1', 'AYS SVD', 'GITS[coeff=1.2]']
-
+#---------------------------------------------------------------------------------------------------------------------#
 #imported from crystools
 class CBoolean:
     def __init__(self):
@@ -91,6 +91,8 @@ class CBoolean:
 
     def execute(self, boolean=True):
         return (boolean,)
+
+#---------------------------------------------------------------------------------------------------------------------#    
 class CFloat:
     def __init__(self):
         pass
@@ -110,6 +112,8 @@ class CFloat:
 
     def execute(self, float=True):
         return (float,)
+    
+#---------------------------------------------------------------------------------------------------------------------#    
 class CInteger:
     def __init__(self):
         pass
@@ -129,6 +133,8 @@ class CInteger:
 
     def execute(self, int=True):
         return (int,)
+
+#---------------------------------------------------------------------------------------------------------------------#    
 class CText:
     def __init__(self):
         pass
@@ -149,10 +155,12 @@ class CText:
     def execute(self, string=""):
         return (string,)
 
+#---------------------------------------------------------------------------------------------------------------------#
 def format_datetime(datetime_format):
     today = datetime.now()
     return f"{today.strftime(datetime_format)}"
 
+#---------------------------------------------------------------------------------------------------------------------#
 #imported from path-helper
 def format_date_time(string, position, datetime_format):
     today = datetime.now()
@@ -161,7 +169,7 @@ def format_date_time(string, position, datetime_format):
     if position == "postfix":
         return f"{string}_{today.strftime(datetime_format)}"
 
-
+#---------------------------------------------------------------------------------------------------------------------#
 def format_variables(string, input_variables):
     if input_variables:
         variables = str(input_variables).split(",")
@@ -169,6 +177,7 @@ def format_variables(string, input_variables):
     else:
         return string
 
+#---------------------------------------------------------------------------------------------------------------------#
 #altered from CreateRootFolder from path-helper
 class CreateProjectFolder:
     def __init__(self):
@@ -212,7 +221,7 @@ class CreateProjectFolder:
         elif output_path_generation == "absolute":
             return (os.path.join(self.output_dir, new_path),)
         
-
+#---------------------------------------------------------------------------------------------------------------------#
 class Add_Folder:
     @classmethod
     def INPUT_TYPES(cls):
@@ -233,7 +242,7 @@ class Add_Folder:
         new_path = os.path.join(path, folder_name)
         return (new_path,)
 
-
+#---------------------------------------------------------------------------------------------------------------------#
 class Add_FileNamePrefix:
     @classmethod
     def INPUT_TYPES(cls):
@@ -263,7 +272,7 @@ class Add_FileNamePrefix:
             new_path = os.path.join(path, format_date_time(filename_name_parsed, add_date_time, date_time_format))
         return (new_path,)
 
-
+#---------------------------------------------------------------------------------------------------------------------#
 class Join_Vars:
     @classmethod
     def INPUT_TYPES(cls):
@@ -287,7 +296,7 @@ class Join_Vars:
         variables = [var_1, var_2, var_3, var_4]
         return (','.join([str(var) for var in variables if var is not None]),)
 
-
+#---------------------------------------------------------------------------------------------------------------------#
 #imported from ImageSaver
 class SamplerSelector:
 
@@ -303,7 +312,7 @@ class SamplerSelector:
     def get_names(self, sampler_name):
         return (sampler_name,)
  
- #added by me using SchedulerSelector from ImageSaver as template   
+ #---------------------------------------------------------------------------------------------------------------------#
 class SchedulerSelector:
 
     @classmethod
@@ -328,7 +337,8 @@ class SchedulerSelector:
     def get_names(self, scheduler_comfy, scheduler_efficient, scheduler_impact):
         return (scheduler_comfy, scheduler_efficient, scheduler_impact, scheduler_impact)
 
-#imported from ComfyRoll
+#---------------------------------------------------------------------------------------------------------------------#
+#imported from ComfyRoll and used as template for the following
 class ImageSwitch:
     @classmethod
     def INPUT_TYPES(cls):
@@ -354,6 +364,7 @@ class ImageSwitch:
         else:
             return (image2,)
 
+#---------------------------------------------------------------------------------------------------------------------#
 class IntegerSwitch:
     @classmethod
     def INPUT_TYPES(cls):
@@ -379,7 +390,7 @@ class IntegerSwitch:
         else:
             return (int2,)
  
- 
+#---------------------------------------------------------------------------------------------------------------------# 
 class MaskSwitch:
     @classmethod
     def INPUT_TYPES(cls):
@@ -405,7 +416,167 @@ class MaskSwitch:
         else:
             return (mask2,)
 
+#---------------------------------------------------------------------------------------------------------------------#
+class LatentInputSwitch:
+    def __init__(self):
+        pass
 
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "Input": ("INT", {"default": 1, "min": 1, "max": 2}),
+            },
+            "optional": {
+                "latent1": ("LATENT",),
+                "latent2": ("LATENT",)          
+            }
+        }
+
+    CATEGORY = "Rvaged/Switches"
+    RETURN_TYPES = ("LATENT",)
+    FUNCTION = "switch"
+
+    def switch(self, Input, latent1=None, latent2=None):
+        if Input == 1:
+            return (latent1,)
+        else:
+            return (latent2,)
+
+#---------------------------------------------------------------------------------------------------------------------#
+class ConditioningInputSwitch:
+    def __init__(self):
+        pass
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "Input": ("INT", {"default": 1, "min": 1, "max": 2}),
+            },
+            "optional": {
+                "conditioning1": ("CONDITIONING",),
+                "conditioning2": ("CONDITIONING",),        
+            }
+        }
+
+    CATEGORY = "Rvaged/Switches"
+    RETURN_TYPES = ("CONDITIONING",)
+    FUNCTION = "switch"
+
+    def switch(self, Input, conditioning1=None, conditioning2=None):
+        if Input == 1:
+            return (conditioning1,)
+        else:
+            return (conditioning2,)
+
+#---------------------------------------------------------------------------------------------------------------------#
+class ClipInputSwitch:
+    def __init__(self):
+        pass
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "Input": ("INT", {"default": 1, "min": 1, "max": 2}),
+            },
+            "optional": {
+                "clip1": ("CLIP",),
+                "clip2": ("CLIP",),      
+            }
+        }
+    CATEGORY = "Rvaged/Switches"
+    RETURN_TYPES = ("CLIP",)
+    FUNCTION = "switch"
+
+    def switch(self, Input, clip1=None, clip2=None):
+        if Input == 1:
+            return (clip1,)
+        else:
+            return (clip2,)
+
+#---------------------------------------------------------------------------------------------------------------------#
+class ModelInputSwitch:
+    def __init__(self):
+        pass
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "Input": ("INT", {"default": 1, "min": 1, "max": 2}),
+            },
+            "optional": {
+                "model1": ("MODEL",),
+                "model2": ("MODEL",),   
+            }
+        }
+    CATEGORY = "Rvaged/Switches"
+    RETURN_TYPES = ("MODEL",)
+    FUNCTION = "switch"
+
+    def switch(self, Input, model1=None, model2=None):
+        if Input == 1:
+            return (model1,)
+        else:
+            return (model2,)
+
+#---------------------------------------------------------------------------------------------------------------------#
+class TextInputSwitch:
+    def __init__(self):
+        pass
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "Input": ("INT", {"default": 1, "min": 1, "max": 2}),
+            },
+            "optional": {
+                "text1": ("STRING", {"forceInput": True}),
+                "text2": ("STRING", {"forceInput": True}), 
+            }
+        }
+
+    CATEGORY = "Rvaged/Switches"
+    RETURN_TYPES = ("STRING",)
+    FUNCTION = "switch"
+
+    def switch(self, Input, text1=None, text2=None,):
+        if Input == 1:
+            return (text1,)
+        else:
+            return (text2,)
+
+#---------------------------------------------------------------------------------------------------------------------#
+class VAEInputSwitch:
+    def __init__(self):
+        pass
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "Input": ("INT", {"default": 1, "min": 1, "max": 2}),            
+            },
+            "optional": {
+                "VAE1": ("VAE", {"forceInput": True}),
+                "VAE2": ("VAE", {"forceInput": True}),
+            }
+        }
+
+    CATEGORY = "Rvaged/Switches"
+    RETURN_TYPES = ("VAE",)   
+    FUNCTION = "switch"
+
+    def switch(self, Input, VAE1=None, VAE2=None,):
+        if Input == 1:
+            return (VAE1,)
+        else:
+            return (VAE2,)
+
+#---------------------------------------------------------------------------------------------------------------------#
 # IMAGES TO RGB (WAS Node)
 class Images2RGB:
 
@@ -432,7 +603,8 @@ class Images2RGB:
             return (tensors, )
         else:
             return (pil2tensor(tensor2pil(images).convert("RGB")), )
-        
+
+#---------------------------------------------------------------------------------------------------------------------#        
 #from comfy essentials
 class ImageList2Batch:
     @classmethod
@@ -467,6 +639,8 @@ class ImageList2Batch:
         out = torch.cat(out, dim=0)
 
         return (out,)        
+
+#---------------------------------------------------------------------------------------------------------------------#
 #from impact
 class ImageBatch2List:
     @classmethod
