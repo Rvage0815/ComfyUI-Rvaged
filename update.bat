@@ -1,1 +1,2 @@
-git pull origin master
+git pull
+pause
