@@ -70,6 +70,11 @@ ANY = AnyType("*")
 SCHEDULERS_COMFY = comfy.samplers.KSampler.SCHEDULERS
 SCHEDULERS_EFFICIENT = comfy.samplers.KSampler.SCHEDULERS + ['AYS SD1', 'AYS SDXL', 'AYS SVD']
 SCHEDULERS_IMPACT = comfy.samplers.KSampler.SCHEDULERS + ['AYS SDXL', 'AYS SD1', 'AYS SVD', 'GITS[coeff=1.2]']
+SCHEDULERS_RESTART = comfy.samplers.KSampler.SCHEDULERS + ['simple_test']
+
+SAMPLERS_COMFY = comfy.samplers.KSampler.SAMPLERS
+SAMPLERS_RESTART = ['euler', 'euler_cfg_pp', 'euler_ancestral', 'euler_ancestral_cfg_pp', 'heun', 'heunpp2', 'dpm_2', 'dpm_2_ancestral', 'lms', 'dpmpp_2s_ancestral', 'dpmpp_2m', 'ddpm', 'lcm', 'ipndm', 'ipndm_v', 'deis', 'ddim']
+
 #---------------------------------------------------------------------------------------------------------------------#
 #imported from crystools
 class CBoolean:
@@ -299,13 +304,33 @@ class Join_Vars:
 #---------------------------------------------------------------------------------------------------------------------#
 #imported from ImageSaver
 class SamplerSelector:
-
     @classmethod
     def INPUT_TYPES(cls):
-        return {"required": {"sampler_name": (comfy.samplers.KSampler.SAMPLERS,)}}
+        return {"required": {
+            "sampler_name": (SAMPLERS_COMFY,),
+            }
+        }
 
     CATEGORY = "Rvaged/Selector"
-    RETURN_TYPES = (comfy.samplers.KSampler.SAMPLERS,)
+    RETURN_TYPES = (SAMPLERS_COMFY,)
+    RETURN_NAMES = ("sampler_name",)
+    FUNCTION = "get_names"
+
+    def get_names(self, sampler_name):
+        return (sampler_name,)
+ 
+#---------------------------------------------------------------------------------------------------------------------#
+class SamplerSelectorRestart:
+    #restart sampler names: 
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {"required": {
+            "sampler_name": (SAMPLERS_RESTART,),
+            }
+        }
+
+    CATEGORY = "Rvaged/Selector"
+    RETURN_TYPES = (SAMPLERS_RESTART,)
     RETURN_NAMES = ("sampler_name",)
     FUNCTION = "get_names"
 
@@ -322,6 +347,7 @@ class SchedulerSelector:
                 "scheduler_comfy": (SCHEDULERS_COMFY,),
                 "scheduler_efficient": (SCHEDULERS_EFFICIENT,),
                 "scheduler_impact": (SCHEDULERS_IMPACT,),
+                "scheduler_restart": (SCHEDULERS_RESTART,),
                 }
             }
 
@@ -330,12 +356,13 @@ class SchedulerSelector:
         SCHEDULERS_COMFY,
         SCHEDULERS_EFFICIENT, 
         SCHEDULERS_IMPACT, 
+        SCHEDULERS_RESTART, 
         "STRING",)
-    RETURN_NAMES = ("scheduler_comfy", "scheduler_efficient", "scheduler_impact", "scheduler_name")
+    RETURN_NAMES = ("scheduler_comfy", "scheduler_efficient", "scheduler_impact", "scheduler_restart", "scheduler_name")
     FUNCTION = "get_names"
 
-    def get_names(self, scheduler_comfy, scheduler_efficient, scheduler_impact):
-        return (scheduler_comfy, scheduler_efficient, scheduler_impact, scheduler_impact)
+    def get_names(self, scheduler_comfy, scheduler_efficient, scheduler_impact, scheduler_restart):
+        return (scheduler_comfy, scheduler_efficient, scheduler_impact, scheduler_impact, scheduler_restart)
 
 #---------------------------------------------------------------------------------------------------------------------#
 #imported from ComfyRoll and used as template for the following

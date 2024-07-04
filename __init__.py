@@ -17,6 +17,7 @@ NODE_CLASS_MAPPINGS = {
     "Add File Name Prefix": Add_FileNamePrefix,
     "Join Variables": Join_Vars,
     "Sampler Selector": SamplerSelector, 
+    "Sampler Selector (Restart)": SamplerSelectorRestart, 
     "Scheduler Selector": SchedulerSelector, 
     "Image Switch": ImageSwitch, 
     "Integer Switch": IntegerSwitch, 
