@@ -70,7 +70,7 @@ ANY = AnyType("*")
 SCHEDULERS_COMFY = comfy.samplers.KSampler.SCHEDULERS
 SCHEDULERS_EFFICIENT = comfy.samplers.KSampler.SCHEDULERS + ['AYS SD1', 'AYS SDXL', 'AYS SVD']
 SCHEDULERS_IMPACT = comfy.samplers.KSampler.SCHEDULERS + ['AYS SDXL', 'AYS SD1', 'AYS SVD', 'GITS[coeff=1.2]']
-SCHEDULERS_RESTART = comfy.samplers.KSampler.SCHEDULERS + ['simple_test']
+SCHEDULERS_RESTART = ('normal', 'karras', 'exponential', 'sgm_uniform', 'simple', 'ddim_uniform', 'simple_test')
 
 SAMPLERS_COMFY = comfy.samplers.KSampler.SAMPLERS
 SAMPLERS_RESTART = ['euler', 'euler_cfg_pp', 'euler_ancestral', 'euler_ancestral_cfg_pp', 'heun', 'heunpp2', 'dpm_2', 'dpm_2_ancestral', 'lms', 'dpmpp_2s_ancestral', 'dpmpp_2m', 'ddpm', 'lcm', 'ipndm', 'ipndm_v', 'deis', 'ddim']
