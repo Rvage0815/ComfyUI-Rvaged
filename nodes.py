@@ -24,6 +24,7 @@ import torch.nn.functional as F
 import torchvision.transforms.v2 as T
 
 import numpy as np
+import re
 
 #comfy essentials
 def p(image):
@@ -38,6 +39,15 @@ def tensor2pil(image):
 # PIL to Tensor (WAS Node)
 def pil2tensor(image):
     return torch.from_numpy(np.array(image).astype(np.float32) / 255.0).unsqueeze(0)
+
+def make_3d_mask(mask):
+    if len(mask.shape) == 4:
+        return mask.squeeze(0)
+
+    elif len(mask.shape) == 2:
+        return mask.unsqueeze(0)
+
+    return mask
 
 FLOAT = ("FLOAT", {"default": 1,
                    "min": -sys.float_info.max,
@@ -159,7 +169,21 @@ class CText:
 
     def execute(self, string=""):
         return (string,)
+#---------------------------------------------------------------------------------------------------------------------#
+class CTextML:
+    @classmethod
+    def INPUT_TYPES(s):
+        return {
+            "required": {"value": ("STRING", {"default": "", "multiline": True})},
+        }
 
+    CATEGORY = "Rvaged/Primitives"
+    RETURN_TYPES = ("STRING",)
+    RETURN_NAMES = ("STRING",)
+    FUNCTION = "execute"
+
+    def execute(self, value):
+        return (value,)
 #---------------------------------------------------------------------------------------------------------------------#
 def format_datetime(datetime_format):
     today = datetime.now()
@@ -222,7 +246,7 @@ class CreateProjectFolder:
            new_path = os.path.join(new_path, folder_name_parsed)
 
         if output_path_generation == "relative":
-            return ("./" + new_path,)
+            return ("./ComfyUI/output/" + new_path,)
         elif output_path_generation == "absolute":
             return (os.path.join(self.output_dir, new_path),)
         
@@ -292,7 +316,7 @@ class Join_Vars:
             }
         }
 
-    CATEGORY = "Rvaged/Folder"
+    CATEGORY = "Rvaged/Operation"
     RETURN_TYPES = ("STRING",)
     RETURN_NAMES = ("string",)
     FUNCTION = "join_vars"
@@ -337,7 +361,7 @@ class SamplerSelectorRestart:
     def get_names(self, sampler_name):
         return (sampler_name,)
  
- #---------------------------------------------------------------------------------------------------------------------#
+#---------------------------------------------------------------------------------------------------------------------#
 class SchedulerSelector:
 
     @classmethod
@@ -358,93 +382,86 @@ class SchedulerSelector:
         SCHEDULERS_IMPACT, 
         SCHEDULERS_RESTART, 
         "STRING",)
-    RETURN_NAMES = ("scheduler_comfy", "scheduler_efficient", "scheduler_impact", "scheduler_restart", "scheduler_name")
+    RETURN_NAMES = ("scheduler_comfy", "scheduler_efficient", "scheduler_impact", "scheduler_restart", "scheduler_name",)
     FUNCTION = "get_names"
 
     def get_names(self, scheduler_comfy, scheduler_efficient, scheduler_impact, scheduler_restart):
-        return (scheduler_comfy, scheduler_efficient, scheduler_impact, scheduler_impact, scheduler_restart)
+        return (scheduler_comfy, scheduler_efficient, scheduler_impact, scheduler_impact, scheduler_restart,)
+ #---------------------------------------------------------------------------------------------------------------------#
+class SchedulerSelectorComfyUI:
 
-#---------------------------------------------------------------------------------------------------------------------#
-#imported from ComfyRoll and used as template for the following
-class ImageSwitch:
     @classmethod
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "Input": ("INT", {"default": 1, "min": 1, "max": 2}),
-            },
-            "optional": {
-                "image1": ("IMAGE",),
-                "image2": ("IMAGE",),            
+                "scheduler_comfy": (SCHEDULERS_COMFY,),
+                }
             }
-        }
 
-    CATEGORY = "Rvaged/Switches"
-    RETURN_TYPES = ("IMAGE",)
-    RETURN_NAMES = ("image",)
-    FUNCTION = "img_switch"
+    CATEGORY = "Rvaged/Selector"
+    RETURN_TYPES = (SCHEDULERS_COMFY, "STRING",)
+    RETURN_NAMES = ("scheduler_comfy", "scheduler_name",)
+    FUNCTION = "get_names"
 
-    def img_switch(self, Input, image1=None, image2=None):
-        
-        if Input == 1:
-            return (image1,)
-        else:
-            return (image2,)
-
+    def get_names(self, scheduler_comfy):
+        return (scheduler_comfy,)
 #---------------------------------------------------------------------------------------------------------------------#
-class IntegerSwitch:
+class SchedulerSelectorEfficient:
+
     @classmethod
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "Input": ("INT", {"default": 1, "min": 1, "max": 2}),
-            },
-            "optional": {
-                "int1": ("INT", {"forceInput": True}),
-                "int2": ("INT", {"forceInput": True}),
+                "scheduler_efficient": (SCHEDULERS_EFFICIENT,),
+                }
             }
-        }
 
-    CATEGORY = "Rvaged/Switches"
-    RETURN_TYPES = ("INT",)
-    RETURN_NAMES = ("int",)
-    FUNCTION = "execute"
+    CATEGORY = "Rvaged/Selector"
+    RETURN_TYPES = (SCHEDULERS_EFFICIENT, "STRING",)
+    RETURN_NAMES = ("scheduler_efficient", "scheduler_name",)
+    FUNCTION = "get_names"
 
-    def execute(self, Input, int1=None, int2=None):
-        
-        if Input == 1:
-            return (int1,)
-        else:
-            return (int2,)
- 
-#---------------------------------------------------------------------------------------------------------------------# 
-class MaskSwitch:
+    def get_names(self, scheduler_efficient):
+        return (scheduler_efficient,)    
+#---------------------------------------------------------------------------------------------------------------------#
+class SchedulerSelectorImpact:
+
     @classmethod
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "Input": ("INT", {"default": 1, "min": 1, "max": 2}),
-            },
-            "optional": {
-                "mask1": ("MASK", {"forceInput": True}),
-                "mask2": ("MASK", {"forceInput": True}),
+                "scheduler_impact": (SCHEDULERS_IMPACT,),
+                }
             }
-        }
 
-    CATEGORY = "Rvaged/Switches"
-    RETURN_TYPES = ("MASK",)
-    RETURN_NAMES = ("mask",)
-    FUNCTION = "execute"
+    CATEGORY = "Rvaged/Selector"
+    RETURN_TYPES = (SCHEDULERS_IMPACT, "STRING",)
+    RETURN_NAMES = ("scheduler_impact", "scheduler_name",)
+    FUNCTION = "get_names"
 
-    def execute(self, Input, mask1=None, mask2=None):
-        
-        if Input == 1:
-            return (mask1,)
-        else:
-            return (mask2,)
-
+    def get_names(self, scheduler_impact):
+        return (scheduler_impact,)    
 #---------------------------------------------------------------------------------------------------------------------#
-class LatentInputSwitch:
+class SchedulerSelectorRestart:
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "scheduler_restart": (SCHEDULERS_RESTART,),
+                }
+            }
+
+    CATEGORY = "Rvaged/Selector"
+    RETURN_TYPES = (SCHEDULERS_RESTART, "STRING",)
+    RETURN_NAMES = ("scheduler_restart", "scheduler_name",)
+    FUNCTION = "get_names"
+
+    def get_names(self, scheduler_restart):
+        return (scheduler_restart,)
+    
+#---------------------------------------------------------------------------------------------------------------------#
+class ClipInputSwitch:
     def __init__(self):
         pass
 
@@ -455,20 +472,19 @@ class LatentInputSwitch:
                 "Input": ("INT", {"default": 1, "min": 1, "max": 2}),
             },
             "optional": {
-                "latent1": ("LATENT",),
-                "latent2": ("LATENT",)          
+                "clip1": ("CLIP",),
+                "clip2": ("CLIP",),      
             }
         }
-
     CATEGORY = "Rvaged/Switches"
-    RETURN_TYPES = ("LATENT",)
+    RETURN_TYPES = ("CLIP",)
     FUNCTION = "switch"
 
-    def switch(self, Input, latent1=None, latent2=None):
+    def switch(self, Input, clip1=None, clip2=None):
         if Input == 1:
-            return (latent1,)
+            return (clip1,)
         else:
-            return (latent2,)
+            return (clip2,)
 
 #---------------------------------------------------------------------------------------------------------------------#
 class ConditioningInputSwitch:
@@ -498,7 +514,8 @@ class ConditioningInputSwitch:
             return (conditioning2,)
 
 #---------------------------------------------------------------------------------------------------------------------#
-class ClipInputSwitch:
+#imported from ComfyRoll and used as template for the others
+class ImageSwitch:
     def __init__(self):
         pass
 
@@ -509,19 +526,107 @@ class ClipInputSwitch:
                 "Input": ("INT", {"default": 1, "min": 1, "max": 2}),
             },
             "optional": {
-                "clip1": ("CLIP",),
-                "clip2": ("CLIP",),      
+                "image1": ("IMAGE",),
+                "image2": ("IMAGE",),            
             }
         }
+
     CATEGORY = "Rvaged/Switches"
-    RETURN_TYPES = ("CLIP",)
+    RETURN_TYPES = ("IMAGE",)
+    RETURN_NAMES = ("image",)
+    FUNCTION = "img_switch"
+
+    def img_switch(self, Input, image1=None, image2=None):
+        
+        if Input == 1:
+            return (image1,)
+        else:
+            return (image2,)
+
+#---------------------------------------------------------------------------------------------------------------------#
+class IntegerSwitch:
+    def __init__(self):
+        pass
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "Input": ("INT", {"default": 1, "min": 1, "max": 2}),
+            },
+            "optional": {
+                "int1": ("INT", {"forceInput": True}),
+                "int2": ("INT", {"forceInput": True}),
+            }
+        }
+
+    CATEGORY = "Rvaged/Switches"
+    RETURN_TYPES = ("INT",)
+    RETURN_NAMES = ("int",)
+    FUNCTION = "execute"
+
+    def execute(self, Input, int1=None, int2=None):
+        
+        if Input == 1:
+            return (int1,)
+        else:
+            return (int2,)
+
+#---------------------------------------------------------------------------------------------------------------------#
+class LatentInputSwitch:
+    def __init__(self):
+        pass
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "Input": ("INT", {"default": 1, "min": 1, "max": 2}),
+            },
+            "optional": {
+                "latent1": ("LATENT",),
+                "latent2": ("LATENT",)          
+            }
+        }
+
+    CATEGORY = "Rvaged/Switches"
+    RETURN_TYPES = ("LATENT",)
     FUNCTION = "switch"
 
-    def switch(self, Input, clip1=None, clip2=None):
+    def switch(self, Input, latent1=None, latent2=None):
         if Input == 1:
-            return (clip1,)
+            return (latent1,)
         else:
-            return (clip2,)
+            return (latent2,)
+
+#---------------------------------------------------------------------------------------------------------------------# 
+class MaskSwitch:
+    def __init__(self):
+        pass
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "Input": ("INT", {"default": 1, "min": 1, "max": 2}),
+            },
+            "optional": {
+                "mask1": ("MASK", {"forceInput": True}),
+                "mask2": ("MASK", {"forceInput": True}),
+            }
+        }
+
+    CATEGORY = "Rvaged/Switches"
+    RETURN_TYPES = ("MASK",)
+    RETURN_NAMES = ("mask",)
+    FUNCTION = "execute"
+
+    def execute(self, Input, mask1=None, mask2=None):
+        
+        if Input == 1:
+            return (mask1,)
+        else:
+            return (mask2,)
 
 #---------------------------------------------------------------------------------------------------------------------#
 class ModelInputSwitch:
@@ -606,7 +711,6 @@ class VAEInputSwitch:
 #---------------------------------------------------------------------------------------------------------------------#
 # IMAGES TO RGB (WAS Node)
 class Images2RGB:
-
     @classmethod
     def INPUT_TYPES(cls):
         return {
@@ -615,7 +719,7 @@ class Images2RGB:
             },
         }
 
-    CATEGORY = "Rvaged/Convert"
+    CATEGORY = "Rvaged/Operation"
     RETURN_TYPES = ("IMAGE",)
     RETURN_NAMES = ("images",)
     FUNCTION = "Images_to_RGB"
@@ -642,7 +746,7 @@ class ImageList2Batch:
             }
         }
 
-    CATEGORY = "Rvaged/Convert"
+    CATEGORY = "Rvaged/Operation"
     RETURN_TYPES = ("IMAGE",)
     RETURN_NAMES = ("images",)
     FUNCTION = "ImageList_to_Batch"
@@ -674,7 +778,7 @@ class ImageBatch2List:
     def INPUT_TYPES(s):
         return {"required": {"images": ("IMAGE",), }}
 
-    CATEGORY = "Rvaged/Convert"
+    CATEGORY = "Rvaged/Operation"
     RETURN_TYPES = ("IMAGE",)
     RETURN_NAMES = ("images",)
     OUTPUT_IS_LIST = (True,)
@@ -683,3 +787,210 @@ class ImageBatch2List:
     def ImageBatch_to_List(self, images):
         iimages = [images[i:i + 1, ...] for i in range(images.shape[0])]
         return (iimages, )
+
+#---------------------------------------------------------------------------------------------------------------------#
+class MaskBatch2List:
+    @classmethod
+    def INPUT_TYPES(s):
+        return {"required": {
+                        "masks": ("MASK", ),
+                      }
+                }
+
+    CATEGORY = "Rvaged/Operation"
+    RETURN_TYPES = ("MASK", )
+    OUTPUT_IS_LIST = (True, )
+    FUNCTION = "MaskBatch_to_List"
+
+    def MaskBatch_to_List(self, masks):
+        if masks is None:
+            empty_mask = torch.zeros((64, 64), dtype=torch.float32, device="cpu")
+            return ([empty_mask], )
+
+        res = []
+
+        for mask in masks:
+            res.append(mask)
+
+        print(f"mask len: {len(res)}")
+
+        res = [make_3d_mask(x) for x in res]
+
+        return (res, )
+
+#---------------------------------------------------------------------------------------------------------------------#
+class MaskList2Batch:
+    @classmethod
+    def INPUT_TYPES(s):
+        return {"required": {
+                        "mask": ("MASK", ),
+                      }
+                }
+
+    INPUT_IS_LIST = True
+
+    CATEGORY = "Rvaged/Operation"
+    RETURN_TYPES = ("MASK", )
+    FUNCTION = "MaskList_to_Batch"
+
+    def MaskList_to_Batch(self, mask):
+        if len(mask) == 1:
+            mask = make_3d_mask(mask[0])
+            return (mask,)
+        elif len(mask) > 1:
+            mask1 = make_3d_mask(mask[0])
+
+            for mask2 in mask[1:]:
+                mask2 = make_3d_mask(mask2)
+                if mask1.shape[1:] != mask2.shape[1:]:
+                    mask2 = comfy.utils.common_upscale(mask2.movedim(-1, 1), mask1.shape[2], mask1.shape[1], "lanczos", "center").movedim(1, -1)
+                mask1 = torch.cat((mask1, mask2), dim=0)
+
+            return (mask1,)
+        else:
+            empty_mask = torch.zeros((1, 64, 64), dtype=torch.float32, device="cpu").unsqueeze(0)
+            return (empty_mask,)
+
+#---------------------------------------------------------------------------------------------------------------------#  
+# from logic  
+class IfExecute:
+    @classmethod
+    def INPUT_TYPES(s):
+        return {
+            "required": {
+                "ANY": (ANY,),
+                "IF_TRUE": (ANY,),
+                "IF_FALSE": (ANY,),
+            },
+        }
+
+    CATEGORY = "Rvaged/Operation"
+    RETURN_TYPES = (ANY,)
+    RETURN_NAMES = "?"
+    FUNCTION = "return_based_on_bool"
+
+    def return_based_on_bool(self, ANY, IF_TRUE, IF_FALSE):
+        return (IF_TRUE if ANY else IF_FALSE,)
+
+#---------------------------------------------------------------------------------------------------------------------#
+#from Logic-Utils
+class ReplaceString:
+    @classmethod
+    def INPUT_TYPES(s):
+        return {
+        "required": {
+            "String": ("STRING", {"default": ""}),
+            "Regex": ("STRING", {"default": ""}),
+            "ReplaceWith": ("STRING", {"default": ""}),
+        }
+    }
+    
+    CATEGORY = "Rvaged/Operation"
+    RETURN_TYPES = ("STRING",)
+    FUNCTION = "replace_string"
+    
+    def replace_string(self, String, Regex, ReplaceWith):
+        # using regex
+        return (re.sub(Regex, ReplaceWith, String),)
+
+#---------------------------------------------------------------------------------------------------------------------#
+class MergeString:
+    @classmethod
+    def INPUT_TYPES(s):
+        return {
+        "required": {
+            "input1": (ANY, {"default": ""}),
+            "input2": (ANY, {"default": ""}),
+        }
+    }
+    CATEGORY = "Rvaged/Operation"
+    RETURN_TYPES = ("STRING",)
+    FUNCTION = "merge_string"
+    
+    def merge_string(self, input1, input2):
+        return (str(input1) + str(input2),)
+
+#---------------------------------------------------------------------------------------------------------------------#
+class PassClip:
+    @classmethod
+    def INPUT_TYPES(s):
+        return {
+            "required": {
+                "clip": ("CLIP",),
+            },
+        }
+    
+    CATEGORY = "Rvaged/Passer"
+    RETURN_TYPES = ("CLIP",)
+    FUNCTION = "passthrough"
+
+    def passthrough(self, clip):
+        return clip,
+
+#---------------------------------------------------------------------------------------------------------------------#
+class PassImages:
+    @classmethod
+    def INPUT_TYPES(s):
+        return {
+            "required": {
+                "image": ("IMAGE",),
+            },
+        }
+    
+    CATEGORY = "Rvaged/Passer"
+    RETURN_TYPES = ("IMAGE",)
+    FUNCTION = "passthrough"
+
+    def passthrough(self, image):
+        return image,
+
+#---------------------------------------------------------------------------------------------------------------------#
+class PassLatent:
+    @classmethod
+    def INPUT_TYPES(s):
+        return {
+            "required": {
+                "latent": ("LATENT",),
+            },
+        }
+    
+    CATEGORY = "Rvaged/Passer"
+    RETURN_TYPES = ("LATENT",)
+    FUNCTION = "passthrough"
+
+    def passthrough(self, latent):
+        return latent,
+
+#---------------------------------------------------------------------------------------------------------------------#
+class PassMasks:
+    @classmethod
+    def INPUT_TYPES(s):
+        return {
+            "required": {
+                "mask": ("MASK",),
+            },
+        }
+    
+    CATEGORY = "Rvaged/Passer"
+    RETURN_TYPES = ("MASK",)
+    FUNCTION = "passthrough"
+
+    def passthrough(self, mask):
+        return mask,
+
+#---------------------------------------------------------------------------------------------------------------------#
+class PassModel:
+    @classmethod
+    def INPUT_TYPES(s):
+        return {
+            "required": {
+                "model": ("MODEL",),
+            },
+        }
+    
+    CATEGORY = "Rvaged/Passer"
+    RETURN_TYPES = ("MODEL",)
+    FUNCTION = "passthrough"
+
+    def passthrough(self, var):
+        return var,
