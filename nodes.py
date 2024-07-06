@@ -246,7 +246,7 @@ class CreateProjectFolder:
            new_path = os.path.join(new_path, folder_name_parsed)
 
         if output_path_generation == "relative":
-            return ("./ComfyUI/output/" + new_path,)
+            return ("./" + new_path,)
         elif output_path_generation == "absolute":
             return (os.path.join(self.output_dir, new_path),)
         
