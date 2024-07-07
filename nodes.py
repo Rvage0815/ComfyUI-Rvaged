@@ -992,5 +992,5 @@ class PassModel:
     RETURN_TYPES = ("MODEL",)
     FUNCTION = "passthrough"
 
-    def passthrough(self, var):
-        return var,
+    def passthrough(self, model):
+        return model,
