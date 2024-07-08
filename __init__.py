@@ -50,4 +50,8 @@ NODE_CLASS_MAPPINGS = {
     "Pass Latent": PassLatent,
     "Pass Masks": PassMasks,
     "Pass Model": PassModel,
+    "Integer to String": Int2Str,
+    "Float to String": Float2Str,
+    "Float to Integer": Float2Int,
+
 }

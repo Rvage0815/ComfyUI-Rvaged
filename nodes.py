@@ -994,3 +994,55 @@ class PassModel:
 
     def passthrough(self, model):
         return model,
+#---------------------------------------------------------------------------------------------------------------------------------------------------#
+# Cloned from Mikey Nodes
+class Int2Str:
+    @classmethod
+    def INPUT_TYPES(s):
+        return {"required": {"int_": ("INT", {"default": 0, "min": 0, "max": 0xffffffffffffffff, "forceInput": True}),
+                }
+        }
+
+    CATEGORY = ("Rvaged/Conversion")
+    RETURN_TYPES = ("STRING", )
+    RETURN_NAMES = ("STRING", )
+    FUNCTION = 'convert'
+
+    def convert(self, int_):
+        return (f'{int_}',)
+
+#---------------------------------------------------------------------------------------------------------------------------------------------------#
+# based on Mikey Nodes
+class Float2Str:
+
+    @classmethod
+    def INPUT_TYPES(s):
+        return {"required": {"float_": ("FLOAT", {"default": 0.0, "min": 0.0, "max": 1000000.0, "forceInput": True}),
+                }        
+        }
+
+    CATEGORY = ("Rvaged/Conversion")
+    RETURN_TYPES = ('STRING',)
+    RETURN_NAMES = ('STRING',)
+    FUNCTION = 'convert'
+
+    def convert(self, float_):
+        return (f'{float_}',)
+
+#---------------------------------------------------------------------------------------------------------------------
+# based on Mikey Nodes
+class Float2Int:
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {"required": {"_float": ("FLOAT", {"default": 0.0, "forceInput": True, "forceInput": True}),
+                }
+        }
+
+    CATEGORY = ("Rvaged/Conversion")
+    RETURN_TYPES = ("INT",)
+    RETURN_NAMES = ("INT",)
+    FUNCTION = "convert"
+
+    def convert(self, _float):
+        return (int(_float),)
