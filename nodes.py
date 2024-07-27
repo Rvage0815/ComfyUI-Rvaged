@@ -326,6 +326,34 @@ class Join_Vars:
         return (','.join([str(var) for var in variables if var is not None]),)
 
 #---------------------------------------------------------------------------------------------------------------------#
+class Join_Vars_V2:
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "var_1": (ANY,),
+            },
+            "optional": {
+                "var_2": (ANY,),
+                "var_3": (ANY,),
+                "var_4": (ANY,),
+                "var_5": (ANY,),
+                "var_6": (ANY,),
+                "var_7": (ANY,),
+                "var_8": (ANY,),
+            }
+        }
+
+    CATEGORY = "Rvaged/Operation"
+    RETURN_TYPES = ("STRING",)
+    RETURN_NAMES = ("string",)
+    FUNCTION = "join_vars2"
+
+    def join_vars2(self, var_1, var_2=None, var_3=None, var_4=None, var_5=None, var_6=None, var_7=None, var_8=None):
+        variables = [var_1, var_2, var_3, var_4, var_5, var_6, var_7, var_8]
+        return (','.join([str(var) for var in variables if var is not None]),)
+
+#---------------------------------------------------------------------------------------------------------------------#
 #imported from ImageSaver
 class SamplerSelector:
     @classmethod
@@ -709,6 +737,33 @@ class VAEInputSwitch:
             return (VAE2,)
 
 #---------------------------------------------------------------------------------------------------------------------#
+class AUDIOInputSwitch:
+    def __init__(self):
+        pass
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "Input": ("INT", {"default": 1, "min": 1, "max": 2}),            
+            },
+            "optional": {
+                "audio1": ("AUDIO", {"forceInput": True}),
+                "audio2": ("AUDIO", {"forceInput": True}),
+            }
+        }
+
+    CATEGORY = "Rvaged/Switches"
+    RETURN_TYPES = ("AUDIO",)   
+    FUNCTION = "switch"
+
+    def switch(self, Input, audio1=None, audio2=None,):
+        if Input == 1:
+            return (audio1,)
+        else:
+            return (audio2,)
+
+#---------------------------------------------------------------------------------------------------------------------#
 # IMAGES TO RGB (WAS Node)
 class Images2RGB:
     @classmethod
@@ -719,7 +774,7 @@ class Images2RGB:
             },
         }
 
-    CATEGORY = "Rvaged/Operation"
+    CATEGORY = "Rvaged/Conversion"
     RETURN_TYPES = ("IMAGE",)
     RETURN_NAMES = ("images",)
     FUNCTION = "Images_to_RGB"
@@ -746,7 +801,7 @@ class ImageList2Batch:
             }
         }
 
-    CATEGORY = "Rvaged/Operation"
+    CATEGORY = "Rvaged/Conversion"
     RETURN_TYPES = ("IMAGE",)
     RETURN_NAMES = ("images",)
     FUNCTION = "ImageList_to_Batch"
@@ -778,7 +833,7 @@ class ImageBatch2List:
     def INPUT_TYPES(s):
         return {"required": {"images": ("IMAGE",), }}
 
-    CATEGORY = "Rvaged/Operation"
+    CATEGORY = "Rvaged/Conversion"
     RETURN_TYPES = ("IMAGE",)
     RETURN_NAMES = ("images",)
     OUTPUT_IS_LIST = (True,)
@@ -797,7 +852,7 @@ class MaskBatch2List:
                       }
                 }
 
-    CATEGORY = "Rvaged/Operation"
+    CATEGORY = "Rvaged/Conversion"
     RETURN_TYPES = ("MASK", )
     OUTPUT_IS_LIST = (True, )
     FUNCTION = "MaskBatch_to_List"
@@ -829,7 +884,7 @@ class MaskList2Batch:
 
     INPUT_IS_LIST = True
 
-    CATEGORY = "Rvaged/Operation"
+    CATEGORY = "Rvaged/Conversion"
     RETURN_TYPES = ("MASK", )
     FUNCTION = "MaskList_to_Batch"
 
