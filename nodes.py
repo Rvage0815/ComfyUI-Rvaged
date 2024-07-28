@@ -1101,3 +1101,30 @@ class Float2Int:
 
     def convert(self, _float):
         return (int(_float),)
+#---------------------------------------------------------------------------------------------------------------------#    
+class IntValueGrp:
+    def __init__(self):
+        pass
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "Width": ("INT", {"default": 150}),
+                "Height": ("INT", {"default": 20}),
+            },
+            "optional": {
+                "Offset_Y": ("INT",{"default": 0}),
+                "Offset_X": ("INT",{"default": 0}),
+            }
+        }
+
+    CATEGORY = "Rvaged"
+    RETURN_TYPES = ("INT","INT","INT","INT",)
+    RETURN_NAMES = ("width","height","offset_y","offset_x",)
+    FUNCTION = "execute"
+
+    def execute(self, Width, Height, Offset_Y, Offset_X):
+        return (Width,Height,Offset_Y,Offset_X,)
+
+#---------------------------------------------------------------------------------------------------------------------#

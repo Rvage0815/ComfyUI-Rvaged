@@ -62,4 +62,5 @@ NODE_CLASS_MAPPINGS = {
     "Model Switch": ModelInputSwitch, 
     "Text Switch": TextInputSwitch, 
     "VAE Switch": VAEInputSwitch, 
+    "IntValueGrp": IntValueGrp, 
 }
