@@ -32,6 +32,7 @@ NODE_CLASS_MAPPINGS = {
     "Join Variables": Join_Vars,
     "Join Variables V2": Join_Vars_V2,
     #passer
+    "Pass Audio": PassAudio,
     "Pass Clip": PassClip,
     "Pass Images": PassImages,
     "Pass Latent": PassLatent,

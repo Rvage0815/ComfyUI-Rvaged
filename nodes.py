@@ -966,6 +966,23 @@ class MergeString:
         return (str(input1) + str(input2),)
 
 #---------------------------------------------------------------------------------------------------------------------#
+class PassAudio:
+    @classmethod
+    def INPUT_TYPES(s):
+        return {
+            "required": {
+                "audio": ("AUDIO",),
+            },
+        }
+    
+    CATEGORY = "Rvaged/Passer"
+    RETURN_TYPES = ("AUDIO",)
+    FUNCTION = "passthrough"
+
+    def passthrough(self, audio):
+        return audio,
+
+#---------------------------------------------------------------------------------------------------------------------#
 class PassClip:
     @classmethod
     def INPUT_TYPES(s):
