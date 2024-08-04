@@ -54,6 +54,7 @@ NODE_CLASS_MAPPINGS = {
     "Scheduler Selector (Restart)": SchedulerSelectorRestart,
     #switches
     "Audio Switch": AUDIOInputSwitch, 
+    "Guider Switch": GuiderSwitch, 
     "Image Switch": ImageSwitch, 
     "Integer Switch": IntegerSwitch, 
     "Mask Switch": MaskSwitch, 

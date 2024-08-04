@@ -542,6 +542,34 @@ class ConditioningInputSwitch:
             return (conditioning2,)
 
 #---------------------------------------------------------------------------------------------------------------------#
+class GuiderSwitch:
+    def __init__(self):
+        pass
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "Input": ("INT", {"default": 1, "min": 1, "max": 2}),
+            },
+            "optional": {
+                "guider1": ("GUIDER",),
+                "guider2": ("GUIDER",),            
+            }
+        }
+
+    CATEGORY = "Rvaged/Switches"
+    RETURN_TYPES = ("GUIDER",)
+    RETURN_NAMES = ("GUIDER",)
+    FUNCTION = "guid_switch"
+
+    def guid_switch(self, Input, guider1=None, guider2=None):
+        
+        if Input == 1:
+            return (guider1,)
+        else:
+            return (guider2,)
+#---------------------------------------------------------------------------------------------------------------------#
 #imported from ComfyRoll and used as template for the others
 class ImageSwitch:
     def __init__(self):
